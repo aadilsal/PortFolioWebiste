@@ -69,23 +69,6 @@ export const myProjects = [
   },
   {
     id: 5,
-    title: "Mobile-DRS-System",
-    description:
-      "A cricket Decision Review System (DRS) simulation using Python and OpenCV.",
-    subDescription: [
-      "Built real-time ball tracking and impact detection with OpenCV.",
-      "Developed a decision engine to mimic DRS system logic.",
-    ],
-    href: "https://github.com/mabdullahsaqib/Mobile-DRS-System",
-    logo: "",
-    image: "/assets/projects/drs.jpg",
-    tags: [
-      { id: 1, name: "Python", path: "/assets/logos/python.svg" },
-      { id: 2, name: "OpenCV", path: "/assets/logos/opencv.svg" },
-    ],
-  },
-  {
-    id: 6,
     title: "F1 Tyre Strategy Predictor",
     description:
       "A predictive analytics project using machine learning models to optimize Formula 1 tyre strategy.",
@@ -102,7 +85,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 7,
+    id: 6,
     title: "Hive Pojek",
     description: "A chat app built using the Django framework.",
     subDescription: [
@@ -118,7 +101,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 8,
+    id: 7,
     title: "Magik",
     description:
       "A spell-inspired programming language built on LLVM, turning code into enchanting computational incantations.",
@@ -135,7 +118,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 9,
+    id: 8,
     title: "LegalMindRAG",
     description:
       "AI-powered human rights legal assistant using RAG, FAISS, and LLMs.",
@@ -154,7 +137,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 10,
+    id: 9,
     title: "Finbotics",
     description:
       "AI-driven MERN stack finance dashboard offering interactive analytics, visualizations, and predictions.",
@@ -174,7 +157,7 @@ export const myProjects = [
     ],
   },
   {
-    id: 11,
+    id: 10,
     title: "MotorAI",
     description:
       "An AI-powered car marketplace built with Next.js, Shadcn UI, and Gemini API—featuring smart image scans, AI search, EMI calculator, and end-to-end booking with admin controls.",
