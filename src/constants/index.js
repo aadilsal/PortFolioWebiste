@@ -204,6 +204,18 @@ export const mySocials = [
 
 export const experiences = [
   {
+    title: "Associate Software Engineer",
+    job: "ILMVERSITY TECH",
+    date: "April 2024 - Present",
+    contents: [
+      "Developed and maintained responsive web applications using Next.js, React, TypeScript, and TailwindCSS.",
+      "Integrated RESTful APIs and optimized frontend performance for scalability and seamless data flow.",
+      "Collaborated with design and backend teams to deliver high-quality, user-focused UI/UX experiences.",
+      "Contributed to the design system, ensuring component reusability and consistent branding across the platform.",
+      "Participated in code reviews, debugging, and feature implementation in an Agile development environment.",
+    ],
+  },
+  {
     title: "Web Development Intern",
     job: "Fiveriver Technologies",
     date: "July 2023 - March 2024",
