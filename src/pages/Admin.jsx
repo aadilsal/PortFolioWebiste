@@ -1,20 +1,27 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { myProjects, experiences } from "../constants";
-import { 
-  fetchProjects, 
-  fetchExperiences, 
-  addProject, 
-  addExperience, 
+import { supabase } from "../lib/supabase";
+import {
+  fetchProjects,
+  fetchExperiences,
+  addProject,
+  addExperience,
   deleteProject as dbDeleteProject,
-  deleteExperience as dbDeleteExperience 
+  deleteExperience as dbDeleteExperience,
 } from "../lib/database";
+import { uploadImage, initializeStorageBucket, deleteImage } from "../lib/storage";
 
 const Admin = () => {
   const [activeTab, setActiveTab] = useState("projects");
   const [dynamicProjects, setDynamicProjects] = useState([]);
   const [dynamicExperiences, setDynamicExperiences] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [session, setSession] = useState(null);
+  const [authError, setAuthError] = useState("");
+  const [authForm, setAuthForm] = useState({ email: "", password: "" });
+  const [uploading, setUploading] = useState(false);
   const [projectForm, setProjectForm] = useState({
     title: "",
     description: "",
@@ -30,10 +37,43 @@ const Admin = () => {
     contents: [""],
   });
 
-  // Load data from Supabase on mount
+  // Auth gate
   useEffect(() => {
-    loadData();
+    const init = async () => {
+      const { data } = await supabase.auth.getSession();
+      setSession(data.session);
+      setAuthLoading(false);
+    };
+
+    init();
+
+    const { data: authListener } = supabase.auth.onAuthStateChange(
+      (_event, newSession) => {
+        setSession(newSession);
+      }
+    );
+
+    return () => {
+      authListener.subscription.unsubscribe();
+    };
   }, []);
+
+  // Load data from Supabase after auth
+  useEffect(() => {
+    if (session) {
+      loadData();
+      initializeStorage();
+    }
+  }, [session]);
+
+  const initializeStorage = async () => {
+    try {
+      await initializeStorageBucket();
+    } catch (error) {
+      console.error('Storage bucket initialization error:', error);
+      // Bucket might already exist, which is fine
+    }
+  };
 
   const loadData = async () => {
     setLoading(true);
@@ -51,8 +91,53 @@ const Admin = () => {
     setLoading(false);
   };
 
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setAuthError("");
+    const { error } = await supabase.auth.signInWithPassword({
+      email: authForm.email,
+      password: authForm.password,
+    });
+    if (error) {
+      setAuthError(error.message);
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+  };
+
   const handleProjectChange = (field, value) => {
     setProjectForm({ ...projectForm, [field]: value });
+  };
+
+  const handleImageUpload = async (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate file type
+    const validTypes = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/gif'];
+    if (!validTypes.includes(file.type)) {
+      alert('Please upload a valid image file (PNG, JPEG, WebP, or GIF)');
+      return;
+    }
+
+    // Validate file size (5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('Image size should be less than 5MB');
+      return;
+    }
+
+    try {
+      setUploading(true);
+      const publicUrl = await uploadImage(file);
+      setProjectForm({ ...projectForm, image: publicUrl });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Failed to upload image. Please try again.');
+    } finally {
+      setUploading(false);
+    }
   };
 
   const handleExperienceChange = (field, value) => {
@@ -169,7 +254,17 @@ const Admin = () => {
     if (!confirm('Are you sure you want to delete this project?')) return;
     
     try {
+      // Find the project to get its image URL
+      const project = dynamicProjects.find(p => p.id === id);
+      
+      // Delete the project from database
       await dbDeleteProject(id);
+      
+      // Delete the image from storage if it's a Supabase URL
+      if (project?.image && project.image.includes('supabase')) {
+        await deleteImage(project.image);
+      }
+      
       await loadData();
       window.dispatchEvent(new Event('projectsUpdated'));
       alert("✅ Project deleted successfully!");
@@ -337,6 +432,64 @@ export const reviews = [];
     alert("Code copied to clipboard! Add it to src/constants/index.js");
   };
 
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center">
+        <p className="text-gray-400">Loading...</p>
+      </div>
+    );
+  }
+
+  if (!session) {
+    return (
+      <div className="min-h-screen bg-black text-white flex items-center justify-center p-6">
+        <div className="w-full max-w-md bg-gray-900 p-6 rounded-lg border border-gray-700">
+          <h1 className="text-2xl font-bold mb-4">Admin Login</h1>
+          <form onSubmit={handleLogin} className="space-y-4">
+            <div>
+              <label className="block mb-2 text-sm text-gray-300">Email</label>
+              <input
+                type="email"
+                value={authForm.email}
+                onChange={(e) =>
+                  setAuthForm({ ...authForm, email: e.target.value })
+                }
+                className="w-full p-3 bg-gray-800 border border-gray-700 rounded"
+                placeholder="you@example.com"
+                required
+              />
+            </div>
+            <div>
+              <label className="block mb-2 text-sm text-gray-300">Password</label>
+              <input
+                type="password"
+                value={authForm.password}
+                onChange={(e) =>
+                  setAuthForm({ ...authForm, password: e.target.value })
+                }
+                className="w-full p-3 bg-gray-800 border border-gray-700 rounded"
+                placeholder="••••••••"
+                required
+              />
+            </div>
+            {authError && (
+              <p className="text-sm text-red-400">{authError}</p>
+            )}
+            <button
+              type="submit"
+              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded"
+            >
+              Sign In
+            </button>
+          </form>
+          <p className="text-xs text-gray-500 mt-4">
+            Only authorized users can access this page.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-black text-white p-8">
       <div className="max-w-5xl mx-auto">
@@ -350,28 +503,40 @@ export const reviews = [];
             </Link>
             <h1 className="text-4xl font-bold">Admin Dashboard</h1>
           </div>
-          <button
-            onClick={exportToFile}
-            className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded"
-          >
-            📥 Export index.js
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={exportToFile}
+              className="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-6 rounded"
+            >
+              📥 Export index.js
+            </button>
+            <button
+              onClick={handleLogout}
+              className="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded"
+            >
+              Sign out
+            </button>
+          </div>
         </div>
 
         {/* Stats */}
         <div className="grid grid-cols-2 gap-4 mb-8">
           <div className="bg-gray-900 p-4 rounded-lg">
             <p className="text-gray-400 text-sm">Total Projects</p>
-            <p className="text-3xl font-bold">{myProjects.length + dynamicProjects.length}</p>
+            <p className="text-3xl font-bold">
+              {myProjects.length + dynamicProjects.length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">
-              {dynamicProjects.length} dynamic, {myProjects.length} static
+              {dynamicProjects.length} database, {myProjects.length} static
             </p>
           </div>
           <div className="bg-gray-900 p-4 rounded-lg">
             <p className="text-gray-400 text-sm">Total Experiences</p>
-            <p className="text-3xl font-bold">{experiences.length + dynamicExperiences.length}</p>
+            <p className="text-3xl font-bold">
+              {experiences.length + dynamicExperiences.length}
+            </p>
             <p className="text-xs text-gray-500 mt-1">
-              {dynamicExperiences.length} dynamic, {experiences.length} static
+              {dynamicExperiences.length} database, {experiences.length} static
             </p>
           </div>
         </div>
@@ -473,14 +638,29 @@ export const reviews = [];
             </div>
 
             <div>
-              <label className="block mb-2 font-semibold">Image Path</label>
-              <input
-                type="text"
-                value={projectForm.image}
-                onChange={(e) => handleProjectChange("image", e.target.value)}
-                className="w-full p-3 bg-gray-800 border border-gray-700 rounded"
-                placeholder="/assets/projects/yourimage.png"
-              />
+              <label className="block mb-2 font-semibold">Image Upload</label>
+              <div className="space-y-3">
+                <input
+                  type="file"
+                  accept="image/png,image/jpeg,image/jpg,image/webp,image/gif"
+                  onChange={handleImageUpload}
+                  disabled={uploading}
+                  className="w-full p-3 bg-gray-800 border border-gray-700 rounded file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-indigo-600 file:text-white hover:file:bg-indigo-700 disabled:opacity-50"
+                />
+                {uploading && (
+                  <p className="text-sm text-indigo-400">Uploading image...</p>
+                )}
+                {projectForm.image && !uploading && (
+                  <div className="space-y-2">
+                    <img
+                      src={projectForm.image}
+                      alt="Preview"
+                      className="w-32 h-32 object-cover rounded border border-gray-700"
+                    />
+                    <p className="text-xs text-gray-400 break-all">{projectForm.image}</p>
+                  </div>
+                )}
+              </div>
             </div>
 
             <div>
@@ -628,15 +808,15 @@ export const reviews = [];
                 <p className="text-gray-400">No dynamic experiences yet. Add one from the "Add Experience" tab.</p>
               ) : (
                 <div className="space-y-3">
-                  {dynamicExperiences.map((exp, index) => (
-                    <div key={index} className="bg-gray-800 p-4 rounded flex justify-between items-start">
+                  {dynamicExperiences.map((exp) => (
+                    <div key={exp.id} className="bg-gray-800 p-4 rounded flex justify-between items-start">
                       <div className="flex-1">
                         <h3 className="font-bold text-lg">{exp.title}</h3>
                         <p className="text-sm text-gray-300">{exp.job}</p>
                         <p className="text-xs text-gray-500">{exp.date}</p>
                       </div>
                       <button
-                        onClick={() => deleteExperience(index)}
+                        onClick={() => deleteExperience(exp.id)}
                         className="ml-4 text-red-500 hover:text-red-400"
                       >
                         🗑️ Delete

@@ -5,7 +5,7 @@ export const fetchProjects = async () => {
   const { data, error } = await supabase
     .from('projects')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('id', { ascending: false });
   
   if (error) {
     console.error('Error fetching projects:', error);
@@ -30,7 +30,7 @@ export const fetchExperiences = async () => {
   const { data, error } = await supabase
     .from('experiences')
     .select('*')
-    .order('created_at', { ascending: false });
+    .order('id', { ascending: false });
   
   if (error) {
     console.error('Error fetching experiences:', error);

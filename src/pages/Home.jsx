@@ -1,24 +1,27 @@
-import React from "react";
+import React, { Suspense } from "react";
+import ScrollProgress from "../components/ScrollProgress";
 import Hero from "../sections/Hero";
-import About from "../sections/About";
-import Projects from "../sections/Projects";
-import Experiences from "../sections/Experiences";
-import Testimonial from "../sections/Testimonial";
-import Contact from "../sections/Contact";
-import Footer from "../sections/Footer";
 import Navbar from "../sections/Navbar";
+
+const About = React.lazy(() => import("../sections/About"));
+const Projects = React.lazy(() => import("../sections/Projects"));
+const Experiences = React.lazy(() => import("../sections/Experiences"));
+const Contact = React.lazy(() => import("../sections/Contact"));
+const Footer = React.lazy(() => import("../sections/Footer"));
 
 const Home = () => {
   return (
     <div className="container mx-auto max-w-7xl">
+      <ScrollProgress />
       <Navbar />
       <Hero />
-      <About />
-      <Projects />
-      <Experiences />
-      <Testimonial />
-      <Contact />
-      <Footer />
+      <Suspense fallback={<div className="py-12 text-center text-neutral-400">Loading content...</div>}>
+        <About />
+        <Projects />
+        <Experiences />
+        <Contact />
+        <Footer />
+      </Suspense>
     </div>
   );
 };

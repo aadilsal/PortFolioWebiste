@@ -270,21 +270,23 @@ export const getAllProjects = async () => {
   try {
     const { fetchProjects } = await import('../lib/database');
     const dbProjects = await fetchProjects();
-    return [...myProjects, ...dbProjects];
+    // Return only database projects, fallback to static if database is empty
+    return dbProjects.length > 0 ? dbProjects : myProjects;
   } catch (error) {
     console.error('Error fetching projects:', error);
-    return myProjects; // Fallback to static projects
+    return myProjects; // Fallback to static projects on error
   }
 };
 
-// Function to get all experiences (static + from Supabase)
+// Function to get all experiences (from Supabase only)
 export const getAllExperiences = async () => {
   try {
     const { fetchExperiences } = await import('../lib/database');
     const dbExperiences = await fetchExperiences();
-    return [...experiences, ...dbExperiences];
+    // Return only database experiences, fallback to static if database is empty
+    return dbExperiences.length > 0 ? dbExperiences : experiences;
   } catch (error) {
     console.error('Error fetching experiences:', error);
-    return experiences; // Fallback to static experiences
+    return experiences; // Fallback to static experiences on error
   }
 };

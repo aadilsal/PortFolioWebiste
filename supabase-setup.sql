@@ -38,30 +38,30 @@ CREATE POLICY "Public read access for experiences"
   ON experiences FOR SELECT
   USING (true);
 
--- Create policies to allow insert/update/delete (you can add authentication later)
-CREATE POLICY "Public insert access for projects"
+-- Create policies to allow insert/update/delete only for authenticated users
+CREATE POLICY "Authenticated insert access for projects"
   ON projects FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY "Public update access for projects"
+CREATE POLICY "Authenticated update access for projects"
   ON projects FOR UPDATE
-  USING (true);
+  USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Public delete access for projects"
+CREATE POLICY "Authenticated delete access for projects"
   ON projects FOR DELETE
-  USING (true);
+  USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Public insert access for experiences"
+CREATE POLICY "Authenticated insert access for experiences"
   ON experiences FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (auth.role() = 'authenticated');
 
-CREATE POLICY "Public update access for experiences"
+CREATE POLICY "Authenticated update access for experiences"
   ON experiences FOR UPDATE
-  USING (true);
+  USING (auth.role() = 'authenticated');
 
-CREATE POLICY "Public delete access for experiences"
+CREATE POLICY "Authenticated delete access for experiences"
   ON experiences FOR DELETE
-  USING (true);
+  USING (auth.role() = 'authenticated');
 
 -- Create indexes for better performance
 CREATE INDEX idx_projects_created_at ON projects(created_at DESC);

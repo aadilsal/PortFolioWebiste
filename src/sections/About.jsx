@@ -1,117 +1,105 @@
-import { useRef } from "react";
-import Card from "../components/Card";
-import { Globe } from "../components/globe";
-import CopyEmailButton from "../components/CopyEmailButton";
-import { Frameworks } from "../components/Frameworks";
+import { motion } from "framer-motion";
+
+const skills = [
+  { name: "React / Next.js", level: 90 },
+  { name: "Node.js / Express", level: 85 },
+  { name: "Databases (SQL/NoSQL)", level: 80 },
+  { name: "AI/ML (RAG, CV)", level: 75 },
+  { name: "DevOps / Cloud", level: 70 },
+  { name: "System Design", level: 78 },
+];
 
 const About = () => {
-  const grid2Container = useRef();
   return (
-    <section className="c-space section-spacing" id="about">
-      <h2 className="text-heading">About Me</h2>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-6 md:auto-rows-[18rem] mt-12">
-        {/* Grid 1 */}
-        <div className="flex items-end grid-default-color grid-1">
-          <img
-            src="assets/coding-pov.png"
-            className="absolute scale-[1.75] -right-[5rem] -top-[1rem] md:scale-[3] md:left-50 md:inset-y-10 lg:scale-[2.5]"
-          />
-          <div className="z-10">
-            <p className="headtext">Hi, I'm Aadil Salman Butt</p>
-            <p className="subtext">
-              Over the last few years, I’ve built expertise in full-stack
-              development, AI-powered applications, and creative digital
-              solutions — delivering projects ranging from web platforms and
-              finance dashboards to programming languages and computer vision
-              systems.
-            </p>
-          </div>
-          <div className="absolute inset-x-0 pointer-evets-none -bottom-4 h-1/2 sm:h-1/3 bg-gradient-to-t from-indigo" />
-        </div>
-        {/* Grid 2 */}
-        <div className="grid-default-color grid-2">
-          <div
-            ref={grid2Container}
-            className="flex items-center justify-center w-full h-full"
-          >
-            <p className="flex items-end text-5xl text-gray-500">
-              CODE IS CRAFT
-            </p>
-            <Card
-              style={{ rotate: "75deg", top: "30%", left: "20%" }}
-              text="GRASP"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-30deg", top: "60%", left: "45%" }}
-              text="SOLID"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "90deg", bottom: "30%", left: "70%" }}
-              text="Design Patterns"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-45deg", top: "55%", left: "0%" }}
-              text="Design Principles"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "20deg", top: "10%", left: "38%" }}
-              text="SRP"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "30deg", top: "70%", left: "70%" }}
-              image="assets/logos/csharp-pink.png"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-45deg", top: "70%", left: "25%" }}
-              image="assets/logos/dotnet-pink.png"
-              containerRef={grid2Container}
-            />
-            <Card
-              style={{ rotate: "-45deg", top: "5%", left: "10%" }}
-              image="assets/logos/blazor-pink.png"
-              containerRef={grid2Container}
-            />
+    <section className="section c-space" id="about">
+      <div className="max-w-6xl">
+        <h2 className="section-title">About</h2>
+        <p className="section-subtitle max-w-3xl">
+          Full Stack Engineer with a focus on product quality, AI augmentation, and high-performance interfaces.
+        </p>
+      </div>
+
+      <div className="grid md:grid-cols-3 lg:grid-cols-3 gap-4 md:gap-6 mt-8 md:mt-12">
+        <div className="card-surface md:col-span-2">
+          <p className="text-base sm:text-lg font-bold">What I build</p>
+          <p className="text-sm sm:text-base text-neutral-300 mt-3 leading-relaxed">
+            I ship end-to-end platforms, intelligent dashboards, and AI-powered assistants. I'm obsessed with clarity, performance, and seamless user journeys.
+          </p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 mt-6">
+            {[
+              { label: "Products", value: "20+" },
+              { label: "Clients", value: "10+" },
+              { label: "Success", value: "98%" },
+            ].map((stat) => (
+              <div key={stat.label} className="rounded-xl bg-white/5 p-3 sm:p-4">
+                <p className="text-xs font-medium text-neutral-400">{stat.label}</p>
+                <p className="text-xl sm:text-2xl font-bold mt-1 sm:mt-2">{stat.value}</p>
+              </div>
+            ))}
           </div>
         </div>
-        {/* Grid 3 */}
-        <div className="grid-black-color grid-3">
-          <div className="z-10 w-[50%]">
-            <p className="headtext">Time Zone</p>
-            <p className="subtext">
-              I'm based in Lahore,Pakistan and open to remote work worldwide
-            </p>
-          </div>
-          <figure className="absolute left-[30%] top-[10%]">
-            <Globe />
-          </figure>
-        </div>
-        {/* Grid 4 */}
-        <div className="grid-special-color grid-4">
-          <div className="flex flex-col items-center justify-center gap-4 size-full">
-            <p className="text-center headtext">
-              Do you want to start a project together?
-            </p>
-            <CopyEmailButton />
+
+        <div className="card-surface">
+          <p className="text-base sm:text-lg font-bold">Location</p>
+          <p className="text-sm sm:text-base text-neutral-300 mt-3">Lahore, Pakistan · Remote</p>
+          <div className="mt-5 sm:mt-6 space-y-2">
+            {[
+              "Clean architecture",
+              "Obsess over UX",
+              "Collaborative delivery",
+            ].map((item) => (
+              <div key={item} className="chip text-xs sm:text-sm">
+                {item}
+              </div>
+            ))}
           </div>
         </div>
-        {/* Grid 5 */}
-        <div className="grid-default-color grid-5">
-          <div className="z-10 w-[50%]">
-            <p className="headText">Teck Stack</p>
-            <p className="subtext">
-              I specialize in full-stack development, AI-powered applications,
-              and modern frameworks — leveraging languages, tools, and design
-              skills to build robust, scalable, and user-friendly solutions.
-            </p>
+      </div>
+
+      <div className="grid md:grid-cols-2 lg:grid-cols-2 gap-4 md:gap-6 mt-8 md:mt-12">
+        <div className="card-surface">
+          <p className="text-base sm:text-lg font-bold">Core Skills</p>
+          <div className="mt-6 space-y-3 sm:space-y-4">
+            {skills.map((skill) => (
+              <div key={skill.name}>
+                <div className="flex items-center justify-between text-xs sm:text-sm">
+                  <span className="font-medium">{skill.name}</span>
+                  <span className="text-neutral-400 text-xs">{skill.level}%</span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-white/5 mt-2">
+                  <motion.div
+                    className="h-2 rounded-full"
+                    style={{ background: "rgb(var(--accent))" }}
+                    initial={{ width: 0 }}
+                    whileInView={{ width: `${skill.level}%` }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.8 }}
+                  />
+                </div>
+              </div>
+            ))}
           </div>
-          <div className="absolute inset-y-0 md:inset-y-9 w-full h-full start-[50%] md:scale-125">
-            <Frameworks />
+        </div>
+
+        <div className="card-surface">
+          <p className="text-base sm:text-lg font-bold">Toolbox</p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {[
+              "React",
+              "Next.js",
+              "Node",
+              "TypeScript",
+              "Tailwind",
+              "PostgreSQL",
+              "MongoDB",
+              "Supabase",
+              "Python",
+              "OpenAI",
+            ].map((tool) => (
+              <span key={tool} className="chip text-xs" title={tool}>
+                {tool}
+              </span>
+            ))}
           </div>
         </div>
       </div>

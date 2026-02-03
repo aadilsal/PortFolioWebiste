@@ -1,34 +1,47 @@
 import { useState } from "react";
 import emailjs from "@emailjs/browser";
-import Alert from "../components/Alert";
-import { Particles } from "../components/Particles";
+import { AnimatePresence, motion } from "framer-motion";
+import { CheckCircle, AlertTriangle, Send } from "lucide-react";
+
 const Contact = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     message: "",
   });
+  const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
-  const [showAlert, setShowAlert] = useState(false);
-  const [alertType, setAlertType] = useState("success");
-  const [alertMessage, setAlertMessage] = useState("");
+  const [toast, setToast] = useState("");
+  const [toastType, setToastType] = useState("success");
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+    setErrors({ ...errors, [e.target.name]: "" });
   };
-  const showAlertMessage = (type, message) => {
-    setAlertType(type);
-    setAlertMessage(message);
-    setShowAlert(true);
-    setTimeout(() => {
-      setShowAlert(false);
-    }, 5000);
+
+  const validate = () => {
+    const next = {};
+    if (formData.name.trim().length < 2) next.name = "Please enter your name.";
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email))
+      next.email = "Please enter a valid email.";
+    if (formData.message.trim().length < 10)
+      next.message = "Message should be at least 10 characters.";
+    setErrors(next);
+    return Object.keys(next).length === 0;
   };
+
+  const showToast = (type, message) => {
+    setToastType(type);
+    setToast(message);
+    setTimeout(() => setToast(""), 4000);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!validate()) return;
     setIsLoading(true);
 
     try {
-      console.log("From submitted:", formData);
       await emailjs.send(
         "service_2067avr",
         "template_6oi6udc",
@@ -41,94 +54,117 @@ const Contact = () => {
         },
         "KljKO0KZIjac-XAhs"
       );
-      setIsLoading(false);
       setFormData({ name: "", email: "", message: "" });
-      showAlertMessage("success", "You message has been sent!");
+      showToast("success", "Message sent successfully!");
     } catch (error) {
+      showToast("error", "Something went wrong. Please try again.");
+    } finally {
       setIsLoading(false);
-      console.log(error);
-      showAlertMessage("danger", "Somthing went wrong!");
     }
   };
+
   return (
-    <section
-      id="contact"
-      className="relative flex items-center c-space section-spacing"
-    >
-      <Particles
-        className="absolute inset-0 -z-50"
-        quantity={100}
-        ease={80}
-        color={"#ffffff"}
-        refresh
-      />
-      {showAlert && <Alert type={alertType} text={alertMessage} />}
-      <div className="flex flex-col items-center justify-center max-w-md p-5 mx-auto border border-white/10 rounded-2xl bg-primary">
-        <div className="flex flex-col items-start w-full gap-5 mb-10">
-          <h2 className="text-heading">Let's Talk</h2>
-          <p className="font-normal text-neutral-400">
-            Whether you're loking to build a new website, improve your existing
-            platform, or bring a unique project to life, I'm here to help
+    <section id="contact" className="section c-space">
+      <div className="grid md:grid-cols-[0.8fr_1.2fr] gap-6 md:gap-8 items-start">
+        <div>
+          <h2 className="section-title">Let's build something great</h2>
+          <p className="section-subtitle max-w-xl mt-4">
+            Need a full‑stack product, AI feature, or a high‑performance UI? I'd love to help.
           </p>
+          <div className="mt-6 md:mt-8 space-y-2 md:space-y-3 text-xs md:text-sm text-neutral-400">
+            <p>📍 Lahore, Pakistan · Remote worldwide</p>
+            <p>⚡ Fast response · 24–48 hours</p>
+          </div>
         </div>
-        <form className="w-full" onSubmit={handleSubmit}>
-          <div className="mb-5">
-            <label htmlFor="name" className="feild-label">
+
+        <form onSubmit={handleSubmit} className="card-surface space-y-4 sm:space-y-5">
+          <div>
+            <label htmlFor="name" className="block text-xs sm:text-sm font-medium mb-2">
               Full Name
             </label>
             <input
               id="name"
               name="name"
               type="text"
-              className="field-input field-input-focus"
+              className="focus-ring w-full"
               placeholder="John Doe"
               autoComplete="name"
               value={formData.name}
               onChange={handleChange}
               required
             />
+            {errors.name && (
+              <p className="text-xs text-red-400 mt-1.5">{errors.name}</p>
+            )}
           </div>
-          <div className="mb-5">
-            <label htmlFor="email" className="feild-label">
-              Email
+          <div>
+            <label htmlFor="email" className="block text-xs sm:text-sm font-medium mb-2">
+              Email Address
             </label>
             <input
               id="email"
               name="email"
               type="email"
-              className="field-input field-input-focus"
-              placeholder="JohnDoe@email.com"
+              className="focus-ring w-full"
+              placeholder="john@email.com"
               autoComplete="email"
               value={formData.email}
               onChange={handleChange}
               required
             />
+            {errors.email && (
+              <p className="text-xs text-red-400 mt-1.5">{errors.email}</p>
+            )}
           </div>
-          <div className="mb-5">
-            <label htmlFor="message" className="feild-label">
+          <div>
+            <label htmlFor="message" className="block text-xs sm:text-sm font-medium mb-2">
               Message
             </label>
             <textarea
               id="message"
               name="message"
-              type="text"
               rows="4"
-              className="field-input field-input-focus"
-              placeholder="Share your thoughts..."
-              autoComplete="message"
+              className="focus-ring w-full"
+              placeholder="Tell me about your project..."
               value={formData.message}
               onChange={handleChange}
               required
             />
+            {errors.message && (
+              <p className="text-xs text-red-400 mt-1.5">{errors.message}</p>
+            )}
           </div>
           <button
             type="submit"
-            className="w-full px-1 py-3 text-lg text-center rounded-md cursor-pointer bg-radial from-lavender to-royal hover-animation"
+            className="btn-primary w-full justify-center focus-ring"
+            disabled={isLoading}
+            aria-busy={isLoading}
           >
-            {!isLoading ? "Send" : "Sending..."}
+            {isLoading ? "Sending..." : "Send Message"}
+            <Send size={16} className="hidden sm:inline" />
           </button>
         </form>
       </div>
+
+      <AnimatePresence>
+        {toast && (
+          <motion.div
+            className="fixed bottom-6 left-4 right-4 sm:left-auto sm:right-6 glass rounded-xl px-4 py-3 text-sm z-50"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: 20 }}
+          >
+            <div className="flex items-center gap-3">
+              {toastType === "success" ? (
+                <CheckCircle size={18} className="text-green-400 flex-shrink-0" />
+              ) : (
+                <AlertTriangle size={18} className="text-red-400 flex-shrink-0" />
+              )}
+              <span>{toast}</span>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   );
 };
