@@ -264,3 +264,27 @@ export const experiences = [
 ];
 
 export const reviews = [];
+
+// Function to get all projects (static + from Supabase)
+export const getAllProjects = async () => {
+  try {
+    const { fetchProjects } = await import('../lib/database');
+    const dbProjects = await fetchProjects();
+    return [...myProjects, ...dbProjects];
+  } catch (error) {
+    console.error('Error fetching projects:', error);
+    return myProjects; // Fallback to static projects
+  }
+};
+
+// Function to get all experiences (static + from Supabase)
+export const getAllExperiences = async () => {
+  try {
+    const { fetchExperiences } = await import('../lib/database');
+    const dbExperiences = await fetchExperiences();
+    return [...experiences, ...dbExperiences];
+  } catch (error) {
+    console.error('Error fetching experiences:', error);
+    return experiences; // Fallback to static experiences
+  }
+};
