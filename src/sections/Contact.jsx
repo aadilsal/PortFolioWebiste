@@ -39,7 +39,7 @@ const Contact = () => {
           to_email: "salmanaadil52@gmail.com",
           message: formData.message,
         },
-        "pn-Bw_mS1_QQdofuV"
+        "KljKO0KZIjac-XAhs"
       );
       setIsLoading(false);
       setFormData({ name: "", email: "", message: "" });
